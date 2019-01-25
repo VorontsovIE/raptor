@@ -1,0 +1,12 @@
+.row.justify-content-center
+    .col
+        - if flash[:error]
+            .alert.alert-danger.alert-dismissible{role: 'alert'}
+                = flash[:error]
+                %button.close{'data-dismiss': 'alert', 'aria-label': 'Close'}
+                    %span{'aria-hidden': true} &times;
+        - if flash[:notice]
+            .alert.alert-primary.alert-dismissible{role: 'alert'}
+                = flash[:notice]
+                %button.close{'data-dismiss': 'alert', 'aria-label': 'Close'}
+                    %span{'aria-hidden': true} &times;

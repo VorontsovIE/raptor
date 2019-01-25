@@ -1,0 +1,11 @@
+[
+  {
+  	"benchmark_name": "motif_pseudo_roc",
+  	"docker_image": "vorontsovie/motif_pseudo_roc",
+  	"submission_type": "motif",
+    "metrics": [
+      {"metric_name": "roc_auc", "greater_is_better": true},
+      {"metric_name": "logroc_auc", "greater_is_better": true}
+    ]
+  }
+]

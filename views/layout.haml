@@ -1,0 +1,16 @@
+!!! 5
+%html{lang: 'en'}
+    %head
+        %meta{charset: "utf-8"}
+        %meta{name: "viewport", content: "width=device-width, initial-scale=1, shrink-to-fit=no"}
+        %link{href: '/css/bootstrap-4.2.1/bootstrap.min.css', rel: 'stylesheet'}
+        %link{href: '/css/application.css', rel: 'stylesheet'}
+        %title GRECO Benchmark initiative
+    %body
+        .container-fluid
+            = haml :flash_alerts
+            = haml :authentication_form
+            = yield
+        %script{src:'/js/jquery-3.3.1.min.js', type: 'text/javascript'}
+        %script{src:'/js/bootstrap-4.2.1/bootstrap.bundle.min.js', type: 'text/javascript'}
+        %script{src:'/js/application.js', type: 'text/javascript'}

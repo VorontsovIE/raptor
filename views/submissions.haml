@@ -1,0 +1,25 @@
+.row
+  .col-6
+    %table.table.table-bordered.table-hover
+      %thead
+        %tr
+          %th{rowspan: 2} user
+          %th{rowspan: 2} TF
+          %th{rowspan: 2} species
+          %th{rowspan: 2} submission
+          - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
+            %th{colspan: measure_types.size}= benchmark.name
+        %tr
+          - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
+            - measure_types.each do |measure_type|
+              %th= measure_type.name
+      %tbody
+        - Submission.each do |submission|
+          %tr
+            %td= submission.user.name
+            %td= submission.tf
+            %td= submission.species
+            %td= submission.ticket
+            - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
+              - measure_types.each do |measure_type|
+                %td= submission.scores.detect{|s| s.measure_type == measure_type }&.value
