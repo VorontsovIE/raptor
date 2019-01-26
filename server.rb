@@ -42,7 +42,8 @@ AMQPManager.start  unless ENV["UNICORN"]
 set :bind, '0.0.0.0'
 set :port, 4567
 
-# we should think about https (to prevent cookies stealing)
+# ToDo: we should think about https (to prevent cookies stealing)
+# ToDo: secret key should be set in env (but for demo version we leave it unsafe)
 use Rack::Session::Cookie, {:key => 'rack.session',
                             :path => '/',
                             :expire_after => 30*24*3600, # In seconds
