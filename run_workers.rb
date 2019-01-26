@@ -5,23 +5,7 @@ require 'shellwords'
 require 'fileutils'
 require_relative 'db'
 require_relative 'message_queue'
-
-def docker_mount_option(src:, dst:, readonly: false)
-  "--mount type=bind,dst=#{dst.shellescape},src=#{src.shellescape}" + (readonly ? ',readonly' : '')
-end
-
-def run_docker(docker_image:, common_data_folder:, benchmark_specific_data_folder:, scene_folder:, benchmark_folder:)
-  config_fn = File.join(scene_folder, 'config.json')
-  mounts = [
-    {dst: '/common_data', src: common_data_folder, readonly: true},
-    {dst: '/benchmark_specific_data', src: benchmark_specific_data_folder, readonly: true},
-    {dst: '/workdir/config.json', src: config_fn, readonly: true},
-    {dst: '/workdir/persistent', src: benchmark_folder},
-  ]
-  mount_options = mounts.map{|opts| docker_mount_option(**opts) }.join(' ')
-  cmd = "docker run --rm #{mount_options} #{docker_image}"
-  system(cmd)
-end
+require_relative 'docker_interface'
 
 def store_metrics_to_db(benchmark_folder, benchmark_run)
   result_fn = File.join(benchmark_folder, 'result.json')
@@ -40,7 +24,7 @@ def process_submission(submission, benchmark_config)
   scene_folder = File.join(SCENE_PATH, submission.ticket)
   benchmark_folder = File.join(scene_folder, benchmark_name)
   FileUtils.mkdir_p(benchmark_folder)
-  success = run_docker({
+  success = run_benchmark_docker({
     docker_image: benchmark_config['docker_image'],
     common_data_folder: File.join(DATA_PATH, submission.species, submission.tf),
     benchmark_specific_data_folder: File.join(DATA_PATH, submission.species, submission.tf, benchmark_name),
