@@ -10,10 +10,11 @@ def docker_mount_option(src:, dst:, readonly: false)
   "--mount type=bind,dst=#{dst.shellescape},src=#{src.shellescape}" + (readonly ? ',readonly' : '')
 end
 
-def run_docker(docker_image:, data_folder:, scene_folder:, benchmark_folder:)
+def run_docker(docker_image:, common_data_folder:, benchmark_specific_data_folder:, scene_folder:, benchmark_folder:)
   config_fn = File.join(scene_folder, 'config.json')
   mounts = [
-    {dst: '/data', src: data_folder, readonly: true},
+    {dst: '/common_data', src: common_data_folder, readonly: true},
+    {dst: '/benchmark_specific_data', src: benchmark_specific_data_folder, readonly: true},
     {dst: '/workdir/config.json', src: config_fn, readonly: true},
     {dst: '/workdir/persistent', src: benchmark_folder},
   ]
@@ -41,7 +42,8 @@ def process_submission(submission, benchmark_config)
   FileUtils.mkdir_p(benchmark_folder)
   success = run_docker({
     docker_image: benchmark_config['docker_image'],
-    data_folder: File.join(DATA_PATH, submission.species, submission.tf),
+    common_data_folder: File.join(DATA_PATH, submission.species, submission.tf),
+    benchmark_specific_data_folder: File.join(DATA_PATH, submission.species, submission.tf, benchmark_name),
     scene_folder: scene_folder,
     benchmark_folder: benchmark_folder,
   })

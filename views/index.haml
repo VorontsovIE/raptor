@@ -1,18 +1,1 @@
-- if signed_in?
-  .row
-    .col-6
-      %form{method: 'post', action: '/submit'}
-        %input{type: 'hidden', name: 'submission_type', value: 'motif'}
-        .form-group
-          %label{for: 'benchmark-tf-input'} TF
-          %select.form-control#benchmark-tf-input{name: 'submission_variant'}
-            - SubmissionVariant.all.group_by(&:species).each do |species, variants|
-              %optgroup{label: species}
-              - variants.each do |variant|
-                %option{value: {tf: variant.tf, species: variant.species}.to_json }= variant.name
-        .form-group
-          %label{for: 'benchmark-motif-input'} Motif
-          %textarea.form-control#benchmark-motif-input{name: 'motif', rows: 10}
-        %button.btn.btn-primary{type: 'submit'} Submit
-- else
-  %p You should sign in to submit a model
+%h1 Intro

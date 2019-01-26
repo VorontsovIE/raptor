@@ -14,11 +14,21 @@ require_relative 'message_queue'
 def motif_submission_config(params)
   submission_type = params[:submission_type]
   submission_variant_config = JSON.parse(params[:submission_variant])
-  motif = params[:motif] # ToDo: unify (here not only motif can be submitted)
+  motif = params[:motif]
   tf      = submission_variant_config['tf']
   species = submission_variant_config['species']
 
-  {motif: motif, tf: tf, species: species, submission_type: submission_type}.tap{|x| pp x}
+  {motif: motif, tf: tf, species: species, submission_type: submission_type}
+end
+
+def motif_predictions_config(params)
+  submission_type = params[:submission_type]
+  submission_variant_config = JSON.parse(params[:submission_variant])
+  predictions = params[:predictions].lines.map(&:strip).map(&:to_f)
+  tf      = submission_variant_config['tf']
+  species = submission_variant_config['species']
+
+  {predictions: predictions, tf: tf, species: species, submission_type: submission_type}
 end
 
 def get_or_post(*args, &block)
@@ -91,6 +101,8 @@ post '/submit' do
     case submission_type
     when 'motif'
       config = motif_submission_config(params)
+    when 'predictions'
+      config = motif_predictions_config(params)
     else
       flash[:error] = "Unknown submission type"
       redirect '/'
@@ -113,6 +125,14 @@ post '/submit' do
   end
 end
 
+get '/submit_motif' do
+  submission_variants = SubmissionVariant.where(submission_type: 'motif').all
+  haml :submit_motif, locals: {submission_variants: submission_variants}
+end
+get '/submit_predictions' do
+  submission_variants = SubmissionVariant.where(submission_type: 'predictions').all
+  haml :submit_predictions, locals: {submission_variants: submission_variants}
+end
 get '/submissions' do
   haml :submissions
 end

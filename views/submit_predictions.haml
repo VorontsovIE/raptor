@@ -1,0 +1,20 @@
+.row
+  .col-6
+    - if signed_in?
+      %form{method: 'post', action: '/submit'}
+        %input{type: 'hidden', name: 'submission_type', value: 'predictions'}
+        .form-group
+          %label{for: 'benchmark-tf-input'} TF
+          %select.form-control#benchmark-tf-input{name: 'submission_variant'}
+            - submission_variants.group_by(&:species).each do |species, variants|
+              %optgroup{label: species}
+              - variants.each do |variant|
+                %option{value: {tf: variant.tf, species: variant.species}.to_json }= variant.name
+        .form-group
+          %label{for: 'benchmark-predictions-input'} Predictions
+          %textarea.form-control#benchmark-predictions-input{name: 'predictions', rows: 10}
+        %button.btn.btn-primary{type: 'submit'} Submit
+    - else
+      %p You should sign in to submit predictions
+  .col-6
+    %p Here one can download data for model training
