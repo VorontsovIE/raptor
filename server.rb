@@ -53,8 +53,12 @@ use Rack::Session::Cookie, {:key => 'rack.session',
 use Rack::Flash, :accessorize => [:notice, :error]
 
 use OmniAuth::Builder do
-  provider :developer
-  provider :identity, :fields => [:email, :name], model: User #, on_login: ->(env){ render 'sign_in' }
+  provider  :identity,
+            fields: [:email, :name],
+            model: User,
+            on_registration:        ->(env){ call env.merge('PATH_INFO' => '/sign_up') },
+            on_failed_registration: ->(env){ call env.merge('PATH_INFO' => '/sign_up') }
+            # (alternative)         ->(env){ Rack::Response.new{|resp| resp.redirect("/sign_up") }.finish }
 end
 set :layout_engine, :haml
 
@@ -74,6 +78,10 @@ def authenticated(&block)
     flash[:error] = 'You should be authenticated to proceed'
     redirect '/'
   end
+end
+
+get '/sign_up' do
+  haml :registration_form
 end
 
 get '/' do
@@ -108,7 +116,7 @@ post '/submit' do
       flash[:error] = "Unknown submission type"
       redirect '/'
     end
-    
+
     submission_variant = SubmissionVariant.first(submission_type: submission_type, tf: config[:tf], species: config[:species])
     if !submission_variant
       flash[:error] = "Unknown submission variant {submission_type: `#{submission_type}`, tf: `#{config[:tf]}`, species: `#{config[:species]}`}"
