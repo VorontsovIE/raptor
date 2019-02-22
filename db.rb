@@ -1,38 +1,16 @@
 require 'sequel'
 require 'omniauth'
 require 'omniauth-identity'
+require_relative 'omniauth-identity-sequel'
 
 Sequel::Model.db = Sequel.sqlite('db.sqlite')
 
 class User < Sequel::Model(:users)
+  include OmniAuth::Identity::Models::Sequel
+  plugin :validation_class_methods
+  validates_uniqueness_of :name, :case_sensitive => false
+
   one_to_many :submissions
-
-  plugin :validation_helpers
-  include ::OmniAuth::Identity::Model
-  include ::OmniAuth::Identity::SecurePassword
-  include ::OmniAuth::Identity::SecurePassword::InstanceMethodsOnActivation
-  auth_key :email
-  attr_reader :password # accessor already defined in SecurePassword
-  attr_accessor :password_confirmation
-
-  def validate
-    super
-    validates_presence :email
-    validates_presence :name
-    validates_presence :password_digest
-    validates_unique :email
-    validates_unique :name
-    errors.add(:password, "doesn't match")  unless password == password_confirmation
-  end
-  alias persisted? valid?
-
-  def self.locate(search_condition_hash)
-    conditions = search_condition_hash.map{|k,v|
-      [k.to_sym, v]
-    }
-    first(conditions)
-  end
-
   def send_submission(ticket:, submission_variant:)
     add_submission(ticket: ticket, submission_variant: submission_variant, creation_time: Time.now)
   end
