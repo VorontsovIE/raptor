@@ -14,7 +14,11 @@ require_relative 'message_queue'
 def motif_submission_config(params)
   submission_type = params[:submission_type]
   submission_variant_config = JSON.parse(params[:submission_variant])
-  motif = params[:motif]
+  if params[:motif_file]
+    motif = params[:motif_file][:tempfile].read
+  else
+    motif = params[:motif]
+  end
   tf      = submission_variant_config['tf']
   species = submission_variant_config['species']
 
@@ -24,7 +28,8 @@ end
 def motif_predictions_config(params)
   submission_type = params[:submission_type]
   submission_variant_config = JSON.parse(params[:submission_variant])
-  predictions = params[:predictions].lines.map(&:strip).map(&:to_f)
+  unparsed_predictions = params[:predictions_file][:tempfile].read
+  predictions = unparsed_predictions.lines.map(&:strip).map(&:to_f)
   tf      = submission_variant_config['tf']
   species = submission_variant_config['species']
 

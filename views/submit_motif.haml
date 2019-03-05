@@ -1,7 +1,7 @@
 .row
   .col-6
     - if signed_in?
-      %form{method: 'post', action: '/submit'}
+      %form{method: 'post', action: '/submit', enctype: 'multipart/form-data'}
         %input{type: 'hidden', name: 'submission_type', value: 'motif'}
         .form-group
           %label{for: 'benchmark-tf-input'} TF
@@ -13,6 +13,10 @@
         .form-group
           %label{for: 'benchmark-motif-input'} Motif
           %textarea.form-control#benchmark-motif-input{name: 'motif', rows: 10}
+        .form-group
+          .custom-file
+            %input.form-control.custom-file-input#motifFile{type: 'file', name: 'motif_file'}
+            %label.custom-file-label{for: 'motifFile'} Choose file
         %button.btn.btn-primary{type: 'submit'} Submit
     - else
       %p You should sign in to submit a model

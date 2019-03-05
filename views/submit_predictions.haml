@@ -1,7 +1,7 @@
 .row
   .col-6
     - if signed_in?
-      %form{method: 'post', action: '/submit'}
+      %form{method: 'post', action: '/submit', enctype: 'multipart/form-data'}
         %input{type: 'hidden', name: 'submission_type', value: 'predictions'}
         .form-group
           %label{for: 'benchmark-tf-input'} TF
@@ -11,8 +11,9 @@
               - variants.each do |variant|
                 %option{value: {tf: variant.tf, species: variant.species}.to_json }= variant.name
         .form-group
-          %label{for: 'benchmark-predictions-input'} Predictions
-          %textarea.form-control#benchmark-predictions-input{name: 'predictions', rows: 10}
+          .custom-file
+            %input.form-control.custom-file-input#predictionsFile{type: 'file', name: 'predictions_file'}
+            %label.custom-file-label{for: 'predictionsFile'} Choose file
         %button.btn.btn-primary{type: 'submit'} Submit
     - else
       %p You should sign in to submit predictions
