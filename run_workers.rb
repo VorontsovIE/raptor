@@ -37,6 +37,7 @@ def process_submission(submission, benchmark_config)
   else
     benchmark_run.update(status: 'failed', modification_time: Time.now)
   end
+  success
 end
 
 AMQPManager.start
@@ -53,8 +54,10 @@ begin
     queue.subscribe(manual_ack: true) do |delivery_info, _properties, body|
       scheduled_task = JSON.parse(body)
       ticket = scheduled_task['ticket']
+      puts "Started processing of #{ticket}."
       submission = Submission.first(ticket: ticket)
-      process_submission(submission, benchmark_config)
+      success = process_submission(submission, benchmark_config)
+      puts "Completion status of #{ticket}: `#{success ? "ok" : "fail"}`."
       AMQPManager.channel.ack(delivery_info.delivery_tag)
     end
   end
