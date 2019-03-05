@@ -145,3 +145,11 @@ end
 get '/submissions' do
   haml :submissions
 end
+
+get '/docs' do
+  haml :docs_general
+end
+
+get '/tech-docs' do
+  haml :docs_technical
+end

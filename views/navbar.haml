@@ -1,22 +1,49 @@
 .row
     .col-12
-        %nav.navbar.navbar-expand-sm.navbar-light.bg-light.nav-fill.justify-content-end
-            %a.nav-brand.mr-auto{href:'/'} About
-            %a.nav-link.mr-5{href:'/submit_motif'} Submit motif
-            %a.nav-link.mr-5{href:'/submit_predictions'} Submit predictions
-            %a.nav-link.mr-5{href:'/submissions'} Leaderboard
+        .navbar.navbar-expand-sm.navbar-light.bg-light.justify-content-end
+            .nav-item.mr-3
+                %a.nav-brand{href:'/'} Home
+            .nav-item.dropdown.mr-3
+                %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Documentation
+                .dropdown-menu
+                    .dropdown-header.text-center General
+                    %a.dropdown-item{href: '/docs#timeline'} Timeline
+                    %a.dropdown-item{href: '/docs#data'} Challenge data
+                    %a.dropdown-item{href: '/docs#stage-leaderboard'} Leaderboard stage
+                    %a.dropdown-item{href: '/docs#stage-final'} Final stage
+                    %a.dropdown-item{href: '/docs#stage-post-challenge'} Post-challenge stage
+                    .dropdown-divider
+                    .dropdown-header.text-center Technical
+                    %a.dropdown-item{href: '/tech-docs#benchmark-protocols'} Benchmarking protocols
+                    %a.dropdown-item{href: '/tech-docs#submission-formats'} Submission formats
+            .nav-item.dropdown.mr-3
+                %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Leaderboard
+                .dropdown-menu
+                    %a.dropdown-item{href: '/submissions'} Position matrix models
+                    %a.dropdown-item{href: '/submissions'} Predictions
 
             - if current_user
-                .navbar-text.mr-3 Hello, #{current_user.name}!
-                %form.form-inline{method: 'post', action: '/auth/logout'}
-                    %button.btn.btn-sm.btn-danger{type: 'submit'} Logout
+                .nav-item.dropdown.mr-3
+                    %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} My account
+                    .dropdown-menu
+                        %a.dropdown-item{href: '/submissions'} My submissions
+                        %a.dropdown-item{href: '/submissions'} My leaderboard
+                        .dropdown-divider
+                        .dropdown-header.text-center New submission
+                        %a.dropdown-item{href: '/submit_motif'} Submit motif
+                        %a.dropdown-item{href: '/submit_predictions'} Submit predictions
+                        .dropdown-divider
+                        %form.dropdown-item.form-inline{method: 'post', action: '/auth/logout'}
+                            %button.dropdown-item.btn.px-0{type: 'submit'} Logout
+
             - else
-                %form.form-inline.mr-2{method: 'post', action: '/auth/identity/callback'}
-                    .form-group
-                        %label{for: 'email-input'} E-mail
-                        %input#email-input.form-control.form-control-sm.ml-1.mr-2{name: 'auth_key', type: 'text'}
-                    .form-group
-                        %label{for: 'password-input'} Password
-                        %input#password-input.form-control.form-control-sm.ml-1.mr-2{name: 'password', type: 'password'}
-                    %button.btn.btn-sm.btn-primary{type: 'submit'} Login
-                %a.btn.btn-sm.btn-secondary{href: '/auth/identity/register'} Sign up
+                .nav-item.dropdown.mr-3
+                    %a.nav-link.dropdown-toggle{href: '#','data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Registration
+                    .dropdown-menu.dropdown-menu-right
+                        .dropdown-item.px-2
+                            %form.form-inline.mr-2{method: 'post', action: '/auth/identity/callback'}
+                                %input#email-input.form-control.form-control-sm.my-1{name: 'auth_key', type: 'text', placeholder: 'E-mail'}
+                                %input#password-input.form-control.form-control-sm.my-1{name: 'password', type: 'password', placeholder: 'Password'}
+                                %button.btn.btn-sm.btn-primary{type: 'submit'} Login
+                        .dropdown-item.px-2
+                            %a.btn.btn-sm.btn-secondary{href: '/auth/identity/register'} Sign up
