@@ -21,5 +21,11 @@
             %td= submission.species
             %td= submission.ticket
             - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
+              - benchmark_run = submission.benchmark_runs.detect{|bench_run| bench_run.benchmark == benchmark }
               - measure_types.each do |measure_type|
-                %td= submission.scores.detect{|s| s.measure_type == measure_type }&.value
+                - if !benchmark_run
+                  %td
+                - elsif benchmark_run.status != 'finished'
+                  %td= benchmark_run.status
+                - else
+                  %td= benchmark_run.scores.detect{|s| s.measure_type == measure_type }&.value
