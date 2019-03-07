@@ -7,12 +7,14 @@
           %th{rowspan: 2} TF
           %th{rowspan: 2} species
           %th{rowspan: 2} submission
-          - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
-            %th{colspan: measure_types.size}= benchmark.name
+          - SUBMISSION_TYPES.sort.each do |submission_type|
+            - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
+              %th{colspan: benchmark_infos[:metrics].size}= benchmark_name
         %tr
-          - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
-            - measure_types.each do |measure_type|
-              %th= measure_type.name
+          - SUBMISSION_TYPES.sort.each do |submission_type|
+            - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
+              - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
+                %th= metric_name
       %tbody
         - Submission.each do |submission|
           %tr
@@ -20,12 +22,13 @@
             %td= submission.tf
             %td= submission.species
             %td= submission.ticket
-            - MeasureType.grouped_by_benchmark_and_sorted.each do |benchmark, measure_types|
-              - benchmark_run = submission.benchmark_runs.detect{|bench_run| bench_run.benchmark == benchmark }
-              - measure_types.each do |measure_type|
-                - if !benchmark_run
-                  %td
-                - elsif benchmark_run.status != 'finished'
-                  %td= benchmark_run.status
-                - else
-                  %td= benchmark_run.scores.detect{|s| s.measure_type == measure_type }&.value
+            - SUBMISSION_TYPES.sort.each do |submission_type|
+              - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
+                - benchmark = submission.benchmark_by_name(benchmark_name)
+                - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
+                  - if !benchmark
+                    %td
+                  - elsif benchmark.status != 'finished'
+                    %td= benchmark.status
+                  - else
+                    %td= benchmark&.metric_by_name(metric_name)&.value

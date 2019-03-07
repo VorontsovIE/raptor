@@ -6,10 +6,10 @@
         .form-group
           %label{for: 'benchmark-tf-input'} TF
           %select.form-control#benchmark-tf-input{name: 'submission_variant'}
-            - submission_variants.group_by(&:species).each do |species, variants|
+            - submission_variants.group_by{|key, config| config[:species] }.each do |species, variants|
               %optgroup{label: species}
-              - variants.each do |variant|
-                %option{value: {tf: variant.tf, species: variant.species}.to_json }= variant.name
+              - variants.each do |key, config|
+                %option{value: key }= config[:name]
         .form-group
           %label{for: 'benchmark-motif-input'} Motif
           %textarea.form-control#benchmark-motif-input{name: 'motif', rows: 10}

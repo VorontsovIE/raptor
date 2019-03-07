@@ -1,6 +1,7 @@
 require 'sequel'
 require 'omniauth'
 require 'omniauth-identity'
+require_relative 'benchmark_configs'
 require_relative 'omniauth-identity-sequel'
 
 Sequel::Model.db = Sequel.sqlite('db.sqlite')
@@ -11,65 +12,50 @@ class User < Sequel::Model(:users)
   validates_uniqueness_of :name, :case_sensitive => false
 
   one_to_many :submissions
-  def send_submission(ticket:, submission_variant:)
-    add_submission(ticket: ticket, submission_variant: submission_variant, creation_time: Time.now)
+  def send_submission(ticket:, submission_type:, submission_variant:)
+    add_submission(ticket: ticket, submission_type: submission_type, submission_variant: submission_variant, creation_time: Time.now)
   end
 end
 
 class Submission < Sequel::Model(:submissions)
   many_to_one :user
-  many_to_one :submission_variant
   one_to_many :benchmark_runs
-  def tf; submission_variant.tf; end
-  def species; submission_variant.species; end
-  def submission_type; submission_variant.submission_type; end
-  def scores
-    benchmark_runs.flat_map(&:scores)
-  end
-  def scores_by_benchmark
-    scores.group_by(&:benchmark).sort_by{|benchmark, scores| benchmark.name }
-  end
-end
 
-class SubmissionVariant < Sequel::Model(:submission_variants)
-  one_to_many :submissions
-end
+  def validate
+    super
+    errors.add(:submission_type, "should be one of #{SUBMISSION_TYPES.join('/')}") unless SUBMISSION_TYPES.include?(submission_type)
+    errors.add(:submission_variant, "should be one of #{SUBMISSION_VARIANTS.join('/')}") unless SUBMISSION_VARIANTS.include?(submission_variant)
+    errors.add(:submission_variant, "should be compatible with `submission_type`")  unless SUBMISSION_VARIANTS[submission_variant][:submission_type] == submission_type
+  end
 
-class Benchmark < Sequel::Model(:benchmarks)
-  one_to_many :measure_types
-  one_to_many :benchmark_runs
-  def measure_type_by_name(measure_type_name)
-    measure_types_dataset.first(name: measure_type_name)
+  def tf
+    SUBMISSION_VARIANTS[submission_variant][:tf]
+  end
+
+  def species
+    SUBMISSION_VARIANTS[submission_variant][:species]
+  end
+
+  def benchmark_by_name(benchmark_name)
+    benchmark_runs.detect{|benchmark_run|
+      benchmark_run.benchmark_name == benchmark_name
+    }
   end
 end
 
 class BenchmarkRun < Sequel::Model(:benchmark_runs)
   many_to_one :submission
-  many_to_one :benchmark
   one_to_many :scores
-  def measure_types; benchmark.measure_types; end
+  def metric_by_name(metric_name)
+    scores.detect{|score_infos|
+      score_infos.metric_name == metric_name
+    }
+  end
   def add_score_for_measure(measure_type_name, value)
-    measure_type = benchmark.measure_type_by_name(measure_type_name)
-    add_score(measure_type_id: measure_type.id, value: value, creation_time: Time.now)
+    add_score(metric_name: measure_type_name, value: value, creation_time: Time.now)
   end
 end
 
 class Score < Sequel::Model(:scores)
   many_to_one :benchmark_run
-  many_to_one :measure_type
-  def benchmark; measure_type.benchmark; end
-  def measure_name; measure_type.full_name; end
-end
-
-class MeasureType < Sequel::Model(:measure_types)
-  one_to_many :scores
-  many_to_one :benchmark
-  def full_name
-    "#{benchmark.name}:#{name}"
-  end
-  def self.grouped_by_benchmark_and_sorted
-    Benchmark.sort_by(&:name).map{|benchmark|
-      [benchmark, benchmark.measure_types.sort_by(&:name)]
-    }
-  end
 end

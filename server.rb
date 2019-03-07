@@ -13,27 +13,29 @@ require_relative 'message_queue'
 
 def motif_submission_config(params)
   submission_type = params[:submission_type]
-  submission_variant_config = JSON.parse(params[:submission_variant])
+  submission_variant = params[:submission_variant]
+  submission_variant_config = SUBMISSION_VARIANTS[submission_variant]
   if params[:motif_file]
     motif = params[:motif_file][:tempfile].read
   else
     motif = params[:motif]
   end
-  tf      = submission_variant_config['tf']
-  species = submission_variant_config['species']
+  tf      = submission_variant_config[:tf]
+  species = submission_variant_config[:species]
 
-  {motif: motif, tf: tf, species: species, submission_type: submission_type}
+  {motif: motif, tf: tf, species: species, submission_type: submission_type, submission_variant: submission_variant}
 end
 
 def motif_predictions_config(params)
   submission_type = params[:submission_type]
-  submission_variant_config = JSON.parse(params[:submission_variant])
+  submission_variant = params[:submission_variant]
+  submission_variant_config = SUBMISSION_VARIANTS[submission_variant]
   unparsed_predictions = params[:predictions_file][:tempfile].read
   predictions = unparsed_predictions.lines.map(&:strip).map(&:to_f)
-  tf      = submission_variant_config['tf']
-  species = submission_variant_config['species']
+  tf      = submission_variant_config[:tf]
+  species = submission_variant_config[:species]
 
-  {predictions: predictions, tf: tf, species: species, submission_type: submission_type}
+  {predictions: predictions, tf: tf, species: species, submission_type: submission_type, submission_variant: submission_variant}
 end
 
 def get_or_post(*args, &block)
@@ -112,6 +114,7 @@ end
 post '/submit' do
   authenticated do
     submission_type = params[:submission_type]
+    submission_variant = params[:submission_variant]
     case submission_type
     when 'motif'
       config = motif_submission_config(params)
@@ -122,17 +125,11 @@ post '/submit' do
       redirect '/'
     end
 
-    submission_variant = SubmissionVariant.first(submission_type: submission_type, tf: config[:tf], species: config[:species])
-    if !submission_variant
-      flash[:error] = "Unknown submission variant {submission_type: `#{submission_type}`, tf: `#{config[:tf]}`, species: `#{config[:species]}`}"
-      redirect '/'
-    end
-
     ticket = SecureRandom.alphanumeric(10)
     FileUtils.mkdir_p "scene/#{ticket}"
     File.write("scene/#{ticket}/config.json", config.to_json)
 
-    current_user.send_submission(ticket: ticket, submission_variant: submission_variant)
+    current_user.send_submission(ticket: ticket, submission_type: submission_type, submission_variant: submission_variant)
     AMQPManager.schedule_task(ticket: ticket, exchange: submission_type)
     flash[:notice] = "Your submission got id <strong>#{ticket}</strong>."
     redirect '/submissions'
@@ -140,12 +137,10 @@ post '/submit' do
 end
 
 get '/submit_motif' do
-  submission_variants = SubmissionVariant.where(submission_type: 'motif').all
-  haml :submit_motif, locals: {submission_variants: submission_variants}
+  haml :submit_motif, locals: {submission_variants: submission_variants_by_type('motif')}
 end
 get '/submit_predictions' do
-  submission_variants = SubmissionVariant.where(submission_type: 'predictions').all
-  haml :submit_predictions, locals: {submission_variants: submission_variants}
+  haml :submit_predictions, locals: {submission_variants: submission_variants_by_type('predictions')}
 end
 get '/submissions' do
   haml :submissions
