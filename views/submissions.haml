@@ -7,28 +7,25 @@
           %th{rowspan: 2} TF
           %th{rowspan: 2} species
           %th{rowspan: 2} submission
-          - SUBMISSION_TYPES.sort.each do |submission_type|
-            - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
-              %th{colspan: benchmark_infos[:metrics].size}= benchmark_name
+          - benchmarks.each do |benchmark_name, benchmark_infos|
+            %th{colspan: benchmark_infos[:metrics].size}= benchmark_name
         %tr
-          - SUBMISSION_TYPES.sort.each do |submission_type|
-            - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
-              - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
-                %th= metric_name
+          - benchmarks.each do |benchmark_name, benchmark_infos|
+            - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
+              %th= metric_name
       %tbody
-        - Submission.each do |submission|
+        - submissions.each do |submission|
           %tr
             %td= submission.user.name
             %td= submission.tf
             %td= submission.species
             %td= submission.ticket
-            - SUBMISSION_TYPES.sort.each do |submission_type|
-              - benchmarks_by_type(submission_type).sort.each do |benchmark_name, benchmark_infos|
-                - benchmark = submission.benchmark_by_name(benchmark_name)
+            - benchmarks.each do |benchmark_name, benchmark_infos|
+              - benchmark_metrics = submission.benchmark_by_name(benchmark_name)
+              - if !benchmark_metrics
+                %td{colspan: benchmark_infos[:metrics].size}
+              - elsif benchmark_metrics.status != 'finished'
+                %td{colspan: benchmark_infos[:metrics].size}= benchmark_metrics.status
+              - else
                 - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
-                  - if !benchmark
-                    %td
-                  - elsif benchmark.status != 'finished'
-                    %td= benchmark.status
-                  - else
-                    %td= benchmark&.metric_by_name(metric_name)&.value
+                  %td= benchmark_metrics.metric_by_name(metric_name)&.value

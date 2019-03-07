@@ -132,7 +132,7 @@ post '/submit' do
     current_user.send_submission(ticket: ticket, submission_type: submission_type, submission_variant: submission_variant)
     AMQPManager.schedule_task(ticket: ticket, exchange: submission_type)
     flash[:notice] = "Your submission got id <strong>#{ticket}</strong>."
-    redirect '/submissions'
+    redirect "/submissions/#{submission_type}"
   end
 end
 
@@ -142,9 +142,19 @@ end
 get '/submit_predictions' do
   haml :submit_predictions, locals: {submission_variants: submission_variants_by_type('predictions')}
 end
-get '/submissions' do
-  haml :submissions
+
+get '/submissions/motif' do
+  submissions = Submission.where(submission_type: 'motif').all
+  benchmarks = benchmarks_by_type('motif').sort
+  haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
 end
+
+get '/submissions/predictions' do
+  submissions = Submission.where(submission_type: 'predictions').all
+  benchmarks = benchmarks_by_type('predictions').sort
+  haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
+end
+
 
 get '/docs' do
   haml :docs_general
