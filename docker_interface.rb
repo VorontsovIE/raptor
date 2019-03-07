@@ -7,6 +7,7 @@ end
 def run_docker(docker_image:, mounts:, additional_options: '', args: '')
   mount_options = mounts.map{|opts| docker_mount_option(**opts) }.join(' ')
   cmd = "docker run --rm #{mount_options} #{additional_options} #{docker_image} #{args}"
+  $stderr.puts cmd
   system(cmd)
 end
 
