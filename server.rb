@@ -145,13 +145,13 @@ end
 
 get '/submissions/motif' do
   submissions = Submission.where(submission_type: 'motif').all
-  benchmarks = benchmarks_by_type('motif').sort
+  benchmarks = benchmarks_by_type('motif').sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
 end
 
 get '/submissions/predictions' do
   submissions = Submission.where(submission_type: 'predictions').all
-  benchmarks = benchmarks_by_type('predictions').sort
+  benchmarks = benchmarks_by_type('predictions').sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
 end
 

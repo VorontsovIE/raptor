@@ -15,8 +15,9 @@ def store_metrics_to_db(benchmark_folder, benchmark_run)
   }
 end
 
-def process_submission(submission, benchmark_name, benchmark_config)
+def process_submission(submission, benchmark_config)
   time = Time.now
+  benchmark_name = benchmark_config[:name]
   benchmark_run = submission.add_benchmark_run(benchmark_name: benchmark_name, status: 'started', creation_time: time, modification_time: time)
 
   scene_folder = File.join(SCENE_PATH, submission.ticket)
@@ -46,22 +47,20 @@ SCENE_PATH = File.absolute_path('scene', __dir__)
 FileUtils.mkdir_p SCENE_PATH
 
 begin
-  SUBMISSION_TYPES.each do |submission_type|
-    benchmarks_by_type(submission_type).each do |benchmark_name, benchmark_config|
-      queue = AMQPManager.channel.queue(benchmark_name, no_declare: true)
-      queue.subscribe(manual_ack: true) do |delivery_info, _properties, body|
-        scheduled_task = JSON.parse(body)
-        ticket = scheduled_task['ticket']
-        puts "Started processing of #{ticket}."
-        if submission = Submission.first(ticket: ticket)
-          success = process_submission(submission, benchmark_name, benchmark_config)
-        else
-          puts "No submission for #{ticket} in database"
-          success = false
-        end
-        puts "Completion status of #{ticket}: `#{success ? "ok" : "fail"}`."
-        AMQPManager.channel.ack(delivery_info.delivery_tag)
+  BENCHMARKS.each do |benchmark_config|
+    queue = AMQPManager.channel.queue(benchmark_config[:name], no_declare: true)
+    queue.subscribe(manual_ack: true) do |delivery_info, _properties, body|
+      scheduled_task = JSON.parse(body)
+      ticket = scheduled_task['ticket']
+      puts "Started processing of #{ticket}."
+      if submission = Submission.first(ticket: ticket)
+        success = process_submission(submission, benchmark_config)
+      else
+        puts "No submission for #{ticket} in database"
+        success = false
       end
+      puts "Completion status of #{ticket}: `#{success ? "ok" : "fail"}`."
+      AMQPManager.channel.ack(delivery_info.delivery_tag)
     end
   end
   loop{ sleep 5 }

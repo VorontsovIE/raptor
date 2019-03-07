@@ -7,12 +7,12 @@
           %th{rowspan: 2} TF
           %th{rowspan: 2} species
           %th{rowspan: 2} submission
-          - benchmarks.each do |benchmark_name, benchmark_infos|
-            %th{colspan: benchmark_infos[:metrics].size}= benchmark_name
+          - benchmarks.each do |benchmark|
+            %th.benchmark-name{colspan: benchmark[:metrics].size}= benchmark[:name]
         %tr
-          - benchmarks.each do |benchmark_name, benchmark_infos|
-            - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
-              %th= metric_name
+          - benchmarks.each do |benchmark|
+            - benchmark[:metrics].sort.each do |metric_name, metric_infos|
+              %th.metric-name= metric_name
       %tbody
         - submissions.each do |submission|
           %tr
@@ -20,12 +20,12 @@
             %td= submission.tf
             %td= submission.species
             %td= submission.ticket
-            - benchmarks.each do |benchmark_name, benchmark_infos|
-              - benchmark_metrics = submission.benchmark_by_name(benchmark_name)
+            - benchmarks.each do |benchmark|
+              - benchmark_metrics = submission.benchmark_by_name(benchmark[:name])
               - if !benchmark_metrics
-                %td{colspan: benchmark_infos[:metrics].size}
+                %td{colspan: benchmark[:metrics].size}
               - elsif benchmark_metrics.status != 'finished'
-                %td{colspan: benchmark_infos[:metrics].size}= benchmark_metrics.status
+                %td{colspan: benchmark[:metrics].size}= benchmark_metrics.status
               - else
-                - benchmark_infos[:metrics].sort.each do |metric_name, metric_infos|
+                - benchmark[:metrics].sort.each do |metric_name, metric_infos|
                   %td= benchmark_metrics.metric_by_name(metric_name)&.value
