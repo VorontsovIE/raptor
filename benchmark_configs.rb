@@ -36,3 +36,7 @@ def submission_variants_by_type(submission_type)
     variant[:submission_type] == submission_type
   }
 end
+
+def benchmark_by_name(bm_name)
+  BENCHMARKS.detect{|bm| bm[:name] == bm_name }
+end
