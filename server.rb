@@ -8,6 +8,7 @@ require 'sqlite3'
 require 'bunny'
 require 'haml'
 require 'securerandom'
+require 'digest/md5'
 require_relative 'db'
 require_relative 'submission_rankings'
 require_relative 'message_queue'
@@ -126,6 +127,14 @@ post '/submit' do
       redirect '/'
     end
 
+    config_hash = Digest::MD5.hexdigest(config.to_json)
+    if same_submission = Submission.first(user_id: current_user.id, config_hash: config_hash)
+      same_submission.update(submission_time: Time.now)
+      flash[:notice] = "Your submission is a duplicate of <strong>#{same_submission.ticket}</strong>. It was set as the most recent submission."
+      redirect "/submissions/#{submission_variant}"
+      return
+    end
+
     ticket = SecureRandom.alphanumeric(10)
     FileUtils.mkdir_p "scene/#{ticket}"
     File.write("scene/#{ticket}/config.json", config.to_json)
@@ -160,7 +169,7 @@ get '/submissions/:submission_variant' do
     submissions = submissions.group_by{|submission|
       [submission.user_id, submission.submission_variant]
     }.map{|uid_variant_pair, submissions_group|
-      submissions_group.max_by(&:creation_time)
+      submissions_group.max_by(&:submission_time)
     }
   end
 
@@ -173,7 +182,7 @@ get '/submissions/:submission_variant' do
   #   }
   # end
 
-  submissions = submissions.sort_by(&:creation_time).reverse
+  submissions = submissions.sort_by(&:submission_time).reverse
   benchmarks = benchmarks_by_type('motif').sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks, ranks: ranks, is_recent: is_recent}
 end
@@ -181,7 +190,7 @@ end
 get '/submissions/predictions' do
   submissions = Submission.where({
     submission_type: 'predictions', user_id: current_user.id
-  }).all.sort_by(&:creation_time).reverse
+  }).all.sort_by(&:submission_time).reverse
   benchmarks = benchmarks_by_type('predictions').sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
 end

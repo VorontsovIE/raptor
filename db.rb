@@ -13,7 +13,15 @@ class User < Sequel::Model(:users)
 
   one_to_many :submissions
   def send_submission(ticket:, submission_type:, submission_variant:)
-    add_submission(ticket: ticket, submission_type: submission_type, submission_variant: submission_variant, creation_time: Time.now)
+    now = Time.now
+    submission = Submission.create({
+      user_id: self.id,
+      ticket: ticket,
+      submission_type: submission_type,
+      submission_variant: submission_variant,
+      creation_time: now,
+      submission_time: now,
+    })
   end
 end
 

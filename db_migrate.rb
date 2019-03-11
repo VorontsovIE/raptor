@@ -19,8 +19,10 @@ unless DB.table_exists?(:submissions)
     String :ticket, null: false, unique: true, index: true
     String :submission_type, null: false, index: true
     String :submission_variant, null: false, index: true
+    String :config_hash
     foreign_key :user_id, :users, null: false, index: true
     DateTime :creation_time
+    DateTime :submission_time
   end
 end
 
