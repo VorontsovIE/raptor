@@ -9,6 +9,7 @@ require 'bunny'
 require 'haml'
 require 'securerandom'
 require_relative 'db'
+require_relative 'submission_rankings'
 require_relative 'message_queue'
 
 def motif_submission_config(params)
@@ -132,7 +133,7 @@ post '/submit' do
     current_user.send_submission(ticket: ticket, submission_type: submission_type, submission_variant: submission_variant)
     AMQPManager.schedule_task(ticket: ticket, exchange: submission_type)
     flash[:notice] = "Your submission got id <strong>#{ticket}</strong>."
-    redirect "/submissions/#{submission_type}"
+    redirect "/submissions/#{submission_variant}"
   end
 end
 
@@ -143,16 +144,55 @@ get '/submit_predictions' do
   haml :submit_predictions, locals: {submission_variants: submission_variants_by_type('predictions')}
 end
 
-get '/submissions/motif' do
-  submissions = Submission.where(submission_type: 'motif').all
+get '/submissions/:submission_variant' do
+  submissions = Submission.where(submission_variant: params[:submission_variant]).all
+  ranks = with_total_ranks(submission_ranks(submissions))
+
+  if params[:personal]
+    submissions = submissions.select{|submission|
+      submission.user_id == current_user.id
+    }
+  end
+
+  is_recent = false
+  if params[:recent] && params[:recent] != 'false'
+    is_recent = true
+    submissions = submissions.group_by{|submission|
+      [submission.user_id, submission.submission_variant]
+    }.map{|uid_variant_pair, submissions_group|
+      submissions_group.max_by(&:creation_time)
+    }
+  end
+
+  # if params[:leaders]
+  #   submissions = submissions.group_by{|submission|
+  #     submission.submission_variant
+  #   }.flat_map{|variant, submissions_group|
+  #     # rankings(submissions_group)
+  #     best_ranked(submissions_group)
+  #   }
+  # end
+
+  submissions = submissions.sort_by(&:creation_time).reverse
   benchmarks = benchmarks_by_type('motif').sort_by{|bm| bm[:name] }
-  haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
+  haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks, ranks: ranks, is_recent: is_recent}
 end
 
 get '/submissions/predictions' do
-  submissions = Submission.where(submission_type: 'predictions').all
+  submissions = Submission.where({
+    submission_type: 'predictions', user_id: current_user.id
+  }).all.sort_by(&:creation_time).reverse
   benchmarks = benchmarks_by_type('predictions').sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
+end
+
+get '/leaderboard/motif' do
+  best_submissions = submission_variants_by_type('motif').each_key.flat_map{|submission_variant|
+    variant_submissions = Submission.where(submission_variant: submission_variant).to_a
+    best_submissions(variant_submissions)
+  }
+  benchmarks = benchmarks_by_type('motif').sort_by{|bm| bm[:name] }
+  haml :submissions, locals: {submissions: best_submissions, benchmarks: benchmarks}
 end
 
 

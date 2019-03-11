@@ -1,4 +1,12 @@
 .row
+  .col-5
+  .col-1.text-right
+    - if is_recent
+      %a{href: "/submissions/#{params[:submission_variant]}?recent=false"} Show all
+    - else
+      %a{href: "/submissions/#{params[:submission_variant]}?recent=true"} Show recent
+
+.row
   .col-6
     %table.table.table-bordered.table-hover
       %thead
@@ -7,6 +15,7 @@
           %th{rowspan: 2} TF
           %th{rowspan: 2} species
           %th{rowspan: 2} submission
+          %th{rowspan: 2} Total rank
           - benchmarks.each do |benchmark|
             %th.benchmark-name{colspan: benchmark[:metrics].size}= benchmark[:name]
         %tr
@@ -20,6 +29,7 @@
             %td= submission.tf
             %td= submission.species
             %td= submission.ticket
+            %td= total_rank_for(ranks, submission)
             - benchmarks.each do |benchmark|
               - benchmark_metrics = submission.benchmark_by_name(benchmark[:name])
               - if !benchmark_metrics
@@ -28,4 +38,7 @@
                 %td{colspan: benchmark[:metrics].size}= benchmark_metrics.status
               - else
                 - benchmark[:metrics].sort.each do |metric_name, metric_infos|
-                  %td= benchmark_metrics.metric_by_name(metric_name)&.value
+                  %td
+                    = benchmark_metrics.metric_by_name(metric_name)&.value&.round(4)
+                    - rank = rank_for(ranks, submission, benchmark[:name], metric_name)
+                    .metric-rank= "(rank #{rank})"

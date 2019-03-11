@@ -25,9 +25,17 @@
             - if current_user
                 .nav-item.dropdown.mr-3
                     %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} My account
-                    .dropdown-menu
-                        %a.dropdown-item{href: '/submissions'} My submissions
-                        %a.dropdown-item{href: '/submissions'} My leaderboard
+                    .dropdown-menu.dropdown-menu-right
+                        .dropdown-header.text-center Motif submissions
+                        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'motif' }.each do |sv, cfg|
+                            %a.dropdown-item{href: "/submissions/#{sv}?recent=true" }= cfg[:name]
+                        .dropdown-divider
+                        .dropdown-header.text-center Predictions submissions
+                        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'predictions' }.each do |sv, cfg|
+                            %a.dropdown-item{href: "/submissions/#{sv}?recent=true" }= cfg[:name]
+                        / %a.dropdown-item{href: '/submissions/predictions'} Predictions submissions
+                        .dropdown-divider
+                        %a.dropdown-item{href: '/leaderboard'} Leaderboard
                         .dropdown-divider
                         .dropdown-header.text-center New submission
                         %a.dropdown-item{href: '/submit_motif'} Submit motif

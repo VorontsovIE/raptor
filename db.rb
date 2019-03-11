@@ -41,6 +41,10 @@ class Submission < Sequel::Model(:submissions)
       benchmark_run.benchmark_name == benchmark_name
     }
   end
+
+  def scores
+    benchmark_runs.flat_map(&:scores)
+  end
 end
 
 class BenchmarkRun < Sequel::Model(:benchmark_runs)
@@ -58,4 +62,8 @@ end
 
 class Score < Sequel::Model(:scores)
   many_to_one :benchmark_run
+  def submission; benchmark_run.submission; end
+  def benchmark_name; benchmark_run.benchmark_name; end
+  def full_metric_type; [benchmark_name, metric_name]; end
+  def full_metric_name; "#{benchmark_name}:#{metric_name}"; end
 end
