@@ -12,17 +12,6 @@ class User < Sequel::Model(:users)
   validates_uniqueness_of :name, :case_sensitive => false
 
   one_to_many :submissions
-  def send_submission(ticket:, submission_type:, submission_variant:)
-    now = Time.now
-    submission = Submission.create({
-      user_id: self.id,
-      ticket: ticket,
-      submission_type: submission_type,
-      submission_variant: submission_variant,
-      creation_time: now,
-      submission_time: now,
-    })
-  end
 end
 
 class Submission < Sequel::Model(:submissions)
@@ -31,9 +20,11 @@ class Submission < Sequel::Model(:submissions)
 
   def validate
     super
-    errors.add(:submission_type, "should be one of #{SUBMISSION_TYPES.join('/')}") unless SUBMISSION_TYPES.include?(submission_type)
-    errors.add(:submission_variant, "should be one of #{SUBMISSION_VARIANTS.join('/')}") unless SUBMISSION_VARIANTS.include?(submission_variant)
-    errors.add(:submission_variant, "should be compatible with `submission_type`")  unless SUBMISSION_VARIANTS[submission_variant][:submission_type] == submission_type
+    errors.add(:submission_variant, "should be one of #{SUBMISSION_VARIANTS.keys.join(', ')} but was `#{submission_variant}`") unless SUBMISSION_VARIANTS.has_key?(submission_variant)
+  end
+
+  def submission_type
+    SUBMISSION_VARIANTS[submission_variant][:submission_type]
   end
 
   def tf
@@ -52,6 +43,12 @@ class Submission < Sequel::Model(:submissions)
 
   def scores
     benchmark_runs.flat_map(&:scores)
+  end
+
+  def most_recent?
+    Submission.where(user_id: user_id, submission_variant: submission_variant).all?{|submission|
+      submission.submission_time <= submission_time
+    }
   end
 end
 

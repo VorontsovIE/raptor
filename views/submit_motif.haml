@@ -1,24 +1,24 @@
 .row
-  .col-6
+  .col-8
     - if signed_in?
       %form{method: 'post', action: '/submit', enctype: 'multipart/form-data'}
-        %input{type: 'hidden', name: 'submission_type', value: 'motif'}
-        .form-group
-          %label{for: 'benchmark-tf-input'} TF
-          %select.form-control#benchmark-tf-input{name: 'submission_variant'}
+        .form-group.row
+          %label.col-form-label.col-sm-3{for: 'submission-name-input'} Submission name
+          %input.col-form-label.col-sm-9.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+        .form-group.row
+          %label.col-form-label.col-sm-3{for: 'benchmark-tf-input'} TF
+          %select.col-form-label.col-sm-9.form-control#benchmark-tf-input{name: 'submission_variant'}
             - submission_variants.group_by{|key, config| config[:species] }.each do |species, variants|
-              %optgroup{label: species}
+              %optgroup{label: SPECIES_NAME[species]}
               - variants.each do |key, config|
                 %option{value: key }= config[:name]
-        .form-group
-          %label{for: 'benchmark-motif-input'} Motif
-          %textarea.form-control#benchmark-motif-input{name: 'motif', rows: 10}
-        .form-group
-          .custom-file
-            %input.form-control.custom-file-input#motifFile{type: 'file', name: 'motif_file'}
+        .form-group.row
+          %label.col-form-label.col-sm-3{for: 'benchmark-motif-input'} Motif
+          %textarea.col-form-label.col-sm-9.form-control#benchmark-motif-input{name: 'motif', rows: 10}
+        .form-group.row
+          .custom-file.ml-3
             %label.custom-file-label{for: 'motifFile'} Choose file
+            %input.form-control.custom-file-input#motifFile{type: 'file', name: 'motif_file'}
         %button.btn.btn-primary{type: 'submit'} Submit
     - else
       %p You should sign in to submit a model
-  .col-6
-    %p Here one can download data for model training

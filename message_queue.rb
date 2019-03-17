@@ -1,3 +1,4 @@
+require 'json'
 require 'bunny'
 
 module AMQPManager

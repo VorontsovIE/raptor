@@ -1,4 +1,4 @@
-.row
+.row.mb-3
     .col-12
         .navbar.navbar-expand-sm.navbar-light.bg-light.justify-content-end
             .nav-item.mr-3
@@ -17,23 +17,22 @@
                     %a.dropdown-item{href: '/tech-docs#benchmark-protocols'} Benchmarking protocols
                     %a.dropdown-item{href: '/tech-docs#submission-formats'} Submission formats
             .nav-item.dropdown.mr-3
-                %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Leaderboard
+                %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Scoreboard
                 .dropdown-menu
-                    %a.dropdown-item{href: '/submissions'} Position matrix models
-                    %a.dropdown-item{href: '/submissions'} Predictions
+                    %a.dropdown-item{href: '/submission_variants'} Submission variants
+                    / %a.dropdown-item{href: '/submissions'} Position matrix models
+                    / %a.dropdown-item{href: '/submissions'} Predictions
 
             - if current_user
                 .nav-item.dropdown.mr-3
+                    %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Submit
+                    .dropdown-menu.dropdown-menu-right
+                        %a.dropdown-item{href: '/submit_motif'} Submit motif
+                        %a.dropdown-item{href: '/submit_predictions'} Submit predictions
+                        %a.dropdown-item{href: '/submit_batch'} Batch submission
+                .nav-item.dropdown.mr-3
                     %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} My account
                     .dropdown-menu.dropdown-menu-right
-                        .dropdown-header.text-center Motif submissions
-                        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'motif' }.each do |sv, cfg|
-                            %a.dropdown-item{href: "/submissions/#{sv}?recent=true" }= cfg[:name]
-                        .dropdown-divider
-                        .dropdown-header.text-center Predictions submissions
-                        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'predictions' }.each do |sv, cfg|
-                            %a.dropdown-item{href: "/submissions/#{sv}?recent=true" }= cfg[:name]
-                        / %a.dropdown-item{href: '/submissions/predictions'} Predictions submissions
                         .dropdown-divider
                         %a.dropdown-item{href: '/leaderboard'} Leaderboard
                         .dropdown-divider

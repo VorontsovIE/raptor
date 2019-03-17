@@ -61,3 +61,11 @@ end
 # def best_ranked(submissions)
 #   assign_ranks
 # end
+
+def most_recent_submissions(submissions, submissions_per_user: 1)
+  submissions.group_by{|submission|
+    [submission.user_id, submission.submission_variant]
+  }.flat_map{|uid_variant_pair, submissions_group|
+    submissions_group.sort_by(&:submission_time).last(submissions_per_user)
+  }
+end

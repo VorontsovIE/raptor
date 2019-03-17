@@ -1,0 +1,17 @@
+.row
+    .col-6
+        %h3 Motif submissions
+        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'motif' }.group_by{|sv,cfg| cfg[:species] }.each do |species, group|
+            %h5= SPECIES_NAME[species]
+            %ul
+                - group.each do |sv, cfg|
+                    %li
+                        %a{href: "/submissions/#{sv}?recent=true" }= cfg[:name]
+    .col-6
+        %h3 Prediction submissions
+        - SUBMISSION_VARIANTS.select{|sv,cfg| cfg[:submission_type] == 'predictions' }.group_by{|sv,cfg| cfg[:species] }.each do |species, group|
+            %h5= SPECIES_NAME[species]
+            %ul
+                - group.each do |sv, cfg|
+                    %li
+                        %a{href: "/submissions/#{sv}?recent=true" }= cfg[:name]

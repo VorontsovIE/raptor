@@ -20,9 +20,23 @@ BENCHMARKS = [
   },
 ]
 
+# METRICS = BENCHMARKS.flat_map{|benchmark_cfg|
+#   benchmark_cfg[:metrics].map{|metric_name, metric_cfg|
+#     metric_cfg.merge({
+#       benchmark_name: benchmark_cfg[:name],
+#       metric_name: metric_name,
+#     })
+#   }
+# }
+
+SPECIES_NAME = {
+  'human' => 'Homo sapiens',
+}
+
+# submission variant key should be valid when used as filename
 SUBMISSION_VARIANTS = {
-  'human:KLF4:motif' => {submission_type: 'motif', species: "human", tf: "KLF4", name: "KLF4 (gut-enriched Krüppel-like factor); Homo sapiens"},
-  'human:KLF4:predictions' => {submission_type: 'predictions', species: "human", tf: "KLF4", name: "KLF4 (gut-enriched Krüppel-like factor); Homo sapiens"},
+  'motif-human-KLF4' => {submission_type: 'motif', species: 'human', tf: 'KLF4', name: 'KLF4 (gut-enriched Krüppel-like factor)'},
+  'predictions-human-KLF4' => {submission_type: 'predictions', species: 'human', tf: 'KLF4', name: 'KLF4 (gut-enriched Krüppel-like factor)'},
 }
 
 def benchmarks_by_type(submission_type)

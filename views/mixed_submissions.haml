@@ -1,0 +1,30 @@
+.row.mt-3
+  .col-6
+  .col-2.text-right
+    - if is_recent
+      %a{href: "/mixed_submissions?recent=false"} Show all
+    - else
+      %a{href: "/mixed_submissions?recent=true"} Show recent
+
+.row
+  .col-8
+    %table.table.table-bordered.table-hover
+      %thead
+        %tr
+          %th user
+          %th submission
+          %th submission variant
+          %th Total rank
+
+      %tbody
+        - submissions.each do |submission|
+          - sv_config = SUBMISSION_VARIANTS[submission.submission_variant]
+          %tr
+            %td= submission.user.name
+            %td= submission.name
+            %td
+              %a{href: "submissions/#{submission.submission_variant}"}
+                = surround '(', ')' do
+                  = sv_config[:submission_type]
+                = sv_config[:name]
+            %td

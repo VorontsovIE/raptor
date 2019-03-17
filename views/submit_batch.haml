@@ -1,0 +1,19 @@
+.row
+    .col-8
+        %p
+            %b Submit an archive with motifs/predictions for several models
+            %br
+            %em
+                %a{href: '/tech-docs#submission-formats'} Description of archive structure
+.row.mb-4
+    .col-8
+        %form{method: 'post', action: '/submit_batch', enctype: 'multipart/form-data'}
+            .form-group.d-flex.flex-row
+                %label.col-form-label.col-sm-3{for: 'submission-name-input'} Submission name
+                %input.col-form-label.col-sm-9.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+            .form-group.d-flex.justify-content-start
+                .custom-file
+                    %input.form-control.custom-file-input#submissionsArchive{type: 'file', name: 'submissions_archive_file[]', multiple: true}
+                    %label.custom-file-label{for: 'submissionsArchive'} Choose *.tar.gz file
+            .form-group.d-flex.justify-content-end
+                %button.btn.btn-primary{type: 'submit'} Submit
