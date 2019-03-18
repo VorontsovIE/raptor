@@ -10,7 +10,8 @@
         %form{method: 'post', action: '/submit_batch', enctype: 'multipart/form-data'}
             .form-group.d-flex.flex-row
                 %label.col-form-label.col-sm-3{for: 'submission-name-input'} Submission name
-                %input.col-form-label.col-sm-9.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+                %input.col-form-label.col-sm-7.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+                %button.col-form-label.col-sm-2.form-control#submission-name-button Random name
             .form-group.d-flex.justify-content-start
                 .custom-file
                     %input.form-control.custom-file-input#submissionsArchive{type: 'file', name: 'submissions_archive_file[]', multiple: true}

@@ -4,7 +4,8 @@
       %form{method: 'post', action: '/submit', enctype: 'multipart/form-data'}
         .form-group.row
           %label.col-form-label.col-sm-3{for: 'submission-name-input'} Submission name
-          %input.col-form-label.col-sm-9.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+          %input.col-form-label.col-sm-7.form-control#submission-name-input{type: 'text', name: 'submission_name'}
+          %button.col-form-label.col-sm-2.form-control#submission-name-button Random name
         .form-group.row
           %label.col-form-label.col-sm-3{for: 'benchmark-tf-input'} TF
           %select.col-form-label.col-sm-9.form-control#benchmark-tf-input{name: 'submission_variant'}
