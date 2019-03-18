@@ -20,6 +20,7 @@
                 %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} Scoreboard
                 .dropdown-menu
                     %a.dropdown-item{href: '/submission_variants'} Submission variants
+                    %a.dropdown-item{href: '/leaderboard'} Leaderboard
                     / %a.dropdown-item{href: '/submissions'} Position matrix models
                     / %a.dropdown-item{href: '/submissions'} Predictions
 
@@ -33,12 +34,7 @@
                 .nav-item.dropdown.mr-3
                     %a.nav-link.dropdown-toggle{href:'#', 'data-toggle': "dropdown", role: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false'} My account
                     .dropdown-menu.dropdown-menu-right
-                        .dropdown-divider
-                        %a.dropdown-item{href: '/leaderboard'} Leaderboard
-                        .dropdown-divider
-                        .dropdown-header.text-center New submission
-                        %a.dropdown-item{href: '/submit_motif'} Submit motif
-                        %a.dropdown-item{href: '/submit_predictions'} Submit predictions
+                        %a.dropdown-item{href: '/personal_submissions'} Personal submissions
                         .dropdown-divider
                         %form.dropdown-item.form-inline{method: 'post', action: '/auth/logout'}
                             %button.dropdown-item.btn.px-0{type: 'submit'} Logout

@@ -1,0 +1,13 @@
+.row
+  .col-8
+    %table.table.table-bordered.table-hover
+      %thead
+        %tr
+          %th user
+          %th rank
+
+      %tbody
+        - User.all.each do |user|
+          %tr
+            %td= user.name
+            %td To be computed

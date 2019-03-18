@@ -179,49 +179,33 @@ get '/submissions/:submission_variant' do
     submissions = most_recent_submissions(submissions, submissions_per_user: 1)
   end
 
-  # if params[:leaders]
-  #   submissions = submissions.group_by{|submission|
-  #     submission.submission_variant
-  #   }.flat_map{|variant, submissions_group|
-  #     # rankings(submissions_group)
-  #     best_ranked(submissions_group)
-  #   }
-  # end
-
   submissions = submissions.sort_by(&:submission_time).reverse
   benchmarks = benchmarks_by_type(submission_type).sort_by{|bm| bm[:name] }
   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks, ranks: ranks, is_recent: is_recent}
 end
 
-# get '/submissions/predictions' do
-#   submissions = Submission.where({
-#     submission_type: 'predictions', user_id: current_user.id
-#   }).all.sort_by(&:submission_time).reverse
-#   benchmarks = benchmarks_by_type('predictions').sort_by{|bm| bm[:name] }
-#   haml :submissions, locals: {submissions: submissions, benchmarks: benchmarks}
-# end
-
 get '/personal_submissions' do
-  submissions = Submission.where(user_id: current_user.id).all
-  # ranks = with_total_ranks(submission_ranks(submissions))
+  user_submissions = Submission.where(user_id: current_user.id).all
 
   is_recent = false
   if params[:recent] && params[:recent] != 'false'
     is_recent = true
-    submissions = most_recent_submissions(submissions, submissions_per_user: 1)
+    user_submissions = most_recent_submissions(user_submissions, submissions_per_user: 1)
   end
 
-  # if params[:leaders]
-  #   submissions = submissions.group_by{|submission|
-  #     submission.submission_variant
-  #   }.flat_map{|variant, submissions_group|
-  #     # rankings(submissions_group)
-  #     best_ranked(submissions_group)
-  #   }
-  # end
+  user_submissions = user_submissions.sort_by(&:submission_time).reverse
+  submission_ranks = user_submissions.map{|user_submission|
+    all_submissions = Submission.where(submission_variant: user_submission.submission_variant).all
 
-  submissions = submissions.sort_by(&:submission_time).reverse
-  haml :personal_submissions, locals: {submissions: submissions, is_recent: is_recent}
+    # we measure rank in case that this user's submission was the last and other playeers ranks are the same
+    most_recent = most_recent_submissions(all_submissions)
+    most_recent_user_submission = most_recent.detect{|submission| submission.user_id == current_user.id }
+    other_user_submissions = most_recent.reject{|submission| submission.user_id == current_user.id }
+    concurring_submissions = other_user_submissions + [user_submission, most_recent_user_submission].compact.uniq
+    ranks = with_total_ranks(submission_ranks(concurring_submissions))
+    [user_submission, ranks[user_submission][:total_rank]]
+  }.to_h
+  haml :personal_submissions, locals: {submissions: user_submissions, is_recent: is_recent, submission_ranks: submission_ranks}
 end
 
 get '/mixed_submissions' do
@@ -237,13 +221,8 @@ get '/mixed_submissions' do
   haml :personal_submissions, locals: {submissions: submissions, is_recent: is_recent}
 end
 
-get '/leaderboard/motif' do
-  best_submissions = submission_variants_by_type('motif').each_key.flat_map{|submission_variant|
-    variant_submissions = Submission.where(submission_variant: submission_variant).to_a
-    best_submissions(variant_submissions)
-  }
-  benchmarks = benchmarks_by_type('motif').sort_by{|bm| bm[:name] }
-  haml :submissions, locals: {submissions: best_submissions, benchmarks: benchmarks}
+get '/leaderboard' do
+  haml :leaderboard
 end
 
 

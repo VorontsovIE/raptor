@@ -18,7 +18,12 @@ end
 def process_submission(submission, benchmark_config)
   time = Time.now
   benchmark_name = benchmark_config[:name]
-  benchmark_run = submission.add_benchmark_run(benchmark_name: benchmark_name, status: 'started', creation_time: time, modification_time: time)
+  benchmark_run = BenchmarkRun.find_or_create(submission_id: submission.id, benchmark_name: benchmark_name) {|br|
+    br.status = 'started'
+    br.creation_time = time
+    br.modification_time = time
+  }
+  # benchmark_run = submission.add_benchmark_run(benchmark_name: benchmark_name, status: 'started', creation_time: time, modification_time: time)
 
   scene_folder = File.join(SCENE_PATH, submission.ticket)
   benchmark_folder = File.join(scene_folder, benchmark_name)

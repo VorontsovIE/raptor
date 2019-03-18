@@ -26,3 +26,9 @@
                   = sv_config[:submission_type]
                 = sv_config[:name]
             %td
+              - if submission.most_recent?
+                %b= submission_ranks[submission]
+              -else
+                %i
+                  = submission_ranks[submission]
+                  (compared to recent submissions)
